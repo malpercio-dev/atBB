@@ -1,17 +1,8 @@
-use atrium_api::{
-    record::KnownRecord::AppBskyFeedPost,
-    types::string,
-};
+use atrium_api::{record::KnownRecord::AppBskyFeedPost, types::string};
 use clap::Parser;
 use jetstream_oxide::{
-    events::{
-        commit::CommitEvent,
-        JetstreamEvent::Commit,
-    },
-    DefaultJetstreamEndpoints,
-    JetstreamCompression,
-    JetstreamConfig,
-    JetstreamConnector,
+    events::{commit::CommitEvent, JetstreamEvent::Commit},
+    DefaultJetstreamEndpoints, JetstreamCompression, JetstreamConfig, JetstreamConnector,
 };
 
 #[derive(Parser, Debug)]
