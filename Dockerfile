@@ -1,4 +1,4 @@
-FROM rust:1.82.0-bullseye as base
+FROM rust:1.82.0-bullseye AS base
 RUN cargo install sccache --version ^0.7
 RUN cargo install cargo-chef --version ^0.1
 ENV RUSTC_WRAPPER=sccache SCCACHE_DIR=/sccache
