@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: 'Lexicon schema actions'
+on:
+  push:
+    paths:
+      - "lexicon/**.yaml"
+  pull_request:
+    paths:
+      - "lexicon/**.yaml"
+
+jobs:
+  lexicon-lint:
+    name: 'lexicon:lint'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - name: 'Yamllint'
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_file_or_dir: 'lexicons'
+          yamllint_strict: true
+          # TODO: allow commenting on PRs?
+          yamllint_comment: false
+
