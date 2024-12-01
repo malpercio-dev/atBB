@@ -1,0 +1,53 @@
+---
+lexicon: 1
+id: space.atbb.post
+defs:
+  main:
+    type: record
+    description: >-
+      Record containing an atBB post.
+    key: tid
+    record:
+      type: object
+      required:
+        - text
+        - createdAt
+      properties:
+        text:
+          type: string
+          maxLength: 3000
+          maxGraphemes: 300
+          description: >-
+            The primary post content.
+            May be an empty string, if there are embeds.
+        forum:
+          type: ref
+          ref: "#forumRef"
+        reply:
+          type: ref
+          ref: "#replyRef"
+        createdAt:
+          type: string
+          format: datetime
+          description: >-
+            Client-declared timestamp when this post was originally created.
+  forumRef:
+    type: object
+    required:
+      - forum
+    properties:
+      forum:
+        type: ref
+        ref: com.atproto.repo.strongRef
+  replyRef:
+    type: object
+    required:
+      - root
+      - parent
+    properties:
+      root:
+        type: ref
+        ref: com.atproto.repo.strongRef
+      parent:
+        type: ref
+        ref: com.atproto.repo.strongRef

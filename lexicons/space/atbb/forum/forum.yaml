@@ -1,0 +1,27 @@
+---
+lexicon: 1
+id: space.atbb.forum.forum
+revision: 1
+defs:
+  main:
+    type: record
+    description: >-
+      Record describing an AtBB forum, which is a collection of posts.
+    key: literal:self
+    record:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 3000
+          maxGraphemes: 300
+          description: >-
+            The name of the forum.
+        description:
+          type: string
+          maxLength: 3000
+          maxGraphemes: 300
+          description: >-
+            A short description for the forum.

@@ -1,0 +1,25 @@
+---
+yaml-files:
+  - "*.yaml"
+
+extends: default
+
+rules:
+  braces:
+    forbid: true
+  brackets:
+    level: error
+    min-spaces-inside: 1
+    max-spaces-inside: 1
+    max-spaces-inside-empty: 0
+  line-length:
+    max: 80
+    level: warning
+  indentation:
+    indent-sequences: true
+    check-multi-line-strings: true
+    spaces: 2
+  new-lines:
+    type: unix
+  new-line-at-end-of-file:
+    level: error
