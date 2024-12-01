@@ -34,7 +34,7 @@ async fn main() -> anyhow::Result<()> {
 
     println!(
         "Listening for '{}' events on DIDs: {:?}",
-        args.nsid.to_string(),
+        args.nsid.as_str(),
         dids,
     );
 
