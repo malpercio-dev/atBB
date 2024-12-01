@@ -1,5 +1,3 @@
-//! A very basic example of how to listen for create/delete events on a specific DID and NSID.
-
 use atrium_api::{
     record::KnownRecord::AppBskyFeedPost,
     types::string,

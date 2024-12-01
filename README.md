@@ -2,6 +2,15 @@
 
 A BB-style forum, on the ATmosphere!
 
+## Usage
+
+To build the container and run the application:
+
+```bash
+docker build -t atbb .
+docker run --rm -it atbb --nsid "app.bsky.feed.post" --did "did:web:malpercio.dev"
+```
+
 ## Contributing
 
 All contributors are welcome! Broadly, the goal of this repository is to build out a
