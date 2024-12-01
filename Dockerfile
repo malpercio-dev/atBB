@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM rust:1.82.0-bullseye AS base
 RUN cargo install sccache --version ^0.7
 RUN cargo install cargo-chef --version ^0.1
