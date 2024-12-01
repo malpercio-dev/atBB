@@ -1,12 +1,12 @@
 {
     "lexicon": 1,
-    "id": "space.atbb.forum",
+    "id": "space.atbb.forum.forum",
     "revision": 1,
     "defs": {
       "main": {
         "type": "record",
         "description": "Record describing an AtBB forum, which is a collection of posts.",
-        "key": "tid",
+        "key": "literal:self",
         "record": {
           "type": "object",
           "required": ["name"],
