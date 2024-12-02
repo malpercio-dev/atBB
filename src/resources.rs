@@ -2,6 +2,5 @@
 //! or external services
 
 mod database;
-mod jetstream;
 
 pub use database::DatabaseClient;
