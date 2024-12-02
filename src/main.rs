@@ -1,61 +1,85 @@
-use atrium_api::{record::KnownRecord::AppBskyFeedPost, types::string};
-use clap::Parser;
-use jetstream_oxide::{
-    events::{commit::CommitEvent, JetstreamEvent::Commit},
-    DefaultJetstreamEndpoints, JetstreamCompression, JetstreamConfig, JetstreamConnector,
-};
+use actix_web::{get, web, HttpServer, Responder};
+use color_eyre::eyre::Result;
+use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+use tera::Tera;
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// The DIDs to listen for events on, if not provided we will listen for all DIDs.
-    #[arg(short, long)]
-    did: Option<Vec<string::Did>>,
-    /// The NSID for the collection to listen for (e.g. `app.bsky.feed.post`).
-    #[arg(short, long)]
-    nsid: string::Nsid,
-}
-
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
-
-    let dids = args.did.unwrap_or_default();
-    let config = JetstreamConfig {
-        endpoint: DefaultJetstreamEndpoints::USEastOne.into(),
-        wanted_collections: vec![args.nsid.clone()],
-        wanted_dids: dids.clone(),
-        compression: JetstreamCompression::Zstd,
-        cursor: None,
-    };
-
-    let jetstream = JetstreamConnector::new(config)?;
-    let (receiver, _) = jetstream.connect().await?;
-
-    println!(
-        "Listening for '{}' events on DIDs: {:?}",
-        args.nsid.as_str(),
-        dids,
-    );
-
-    while let Ok(event) = receiver.recv_async().await {
-        if let Commit(commit) = event {
-            match commit {
-                CommitEvent::Create { info: _, commit } => {
-                    if let AppBskyFeedPost(record) = commit.record {
-                        println!(
-                            "New post created! ({})\n\n'{}'",
-                            commit.info.rkey, record.text
-                        );
-                    }
-                }
-                CommitEvent::Delete { info: _, commit } => {
-                    println!("A post has been deleted. ({})", commit.rkey);
-                }
-                _ => {}
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        match Tera::new("src/templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Template parsing error(s): {e}");
+                ::std::process::exit(1);
             }
         }
+    };
+}
+
+#[derive(Serialize)]
+struct AppState {
+    forums: Vec<Forum>,
+}
+
+impl AppState {
+    fn get_forums(&self) -> &Vec<Forum> {
+        &self.forums
     }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Forum {
+    id: &'static str,
+    name: &'static str,
+    description: &'static str,
+}
+
+#[get("/")]
+async fn index(state: actix_web::web::Data<AppState>) -> impl Responder {
+    let mut ctx = tera::Context::new();
+    ctx.insert("forums", state.get_forums());
+
+    let rendered = TEMPLATES.render("index.html", &ctx).unwrap();
+
+    actix_web::HttpResponse::Ok().body(rendered)
+}
+
+#[get("/forums")]
+async fn forums_handler(
+    _action: actix_web::web::Path<(String, String)>,
+    _state: actix_web::web::Data<AppState>,
+) -> impl Responder {
+    let ctx = tera::Context::new();
+
+    let rendered = TEMPLATES.render("components/forums.html", &ctx).unwrap();
+
+    actix_web::HttpResponse::Ok().body(rendered)
+}
+
+#[actix_web::main]
+async fn main() -> Result<()> {
+    color_eyre::install()?;
+
+    HttpServer::new(|| {
+        actix_web::App::new()
+            // register state
+            .app_data(web::Data::new(AppState {
+                forums: vec![Forum {
+                    id: "asdf",
+                    name: "hello world",
+                    description: "this is a forum",
+                }],
+            }))
+            // index route
+            .service(index)
+            // forums route
+            .service(forums_handler)
+            // static files
+            .service(actix_files::Files::new("/", "./src/static/").show_files_listing())
+    })
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await?;
 
     Ok(())
 }
