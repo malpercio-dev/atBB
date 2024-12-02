@@ -8,10 +8,8 @@ license = "AGPL-3.0"
 
 [dependencies]
 axum = "0.7.5"
-anyhow = "1.0.93"
 async-trait = "0.1.83"
 atrium-api = "0.24.8"
-clap = { version = "4.5.20", features = ["derive"] }
 color-eyre = "0.6.2"
 health = "0.2"
 http-body = "1.0.1"
