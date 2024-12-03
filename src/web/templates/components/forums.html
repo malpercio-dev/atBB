@@ -1,0 +1,8 @@
+{% for forum in forums %}
+<div id="forum-{{ forum.id }}" class="forum" hx-target="#forum-{{ forum.id }}" hx-swap="outerHTML">
+    <p>
+        <span class="forum-name">{{ forum.name }}</span>
+        <span class="forum-description">{{ forum.description }}</span>
+    </p>
+</div>
+{% endfor %}

@@ -8,7 +8,7 @@ To build the container and run the application:
 
 ```bash
 docker build -t atbb .
-docker run --rm -it atbb --nsid "app.bsky.feed.post" --did "did:web:malpercio.dev"
+docker run atbb
 ```
 
 ## Contributing
