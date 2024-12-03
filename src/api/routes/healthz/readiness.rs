@@ -1,7 +1,6 @@
 //! Readiness probe for container orchestration platforms.
 //! A successful response indicates that the application is ready
 //! to serve traffic.
-//!
 
 use axum::{http, response::IntoResponse, Extension};
 use health::Reporter;

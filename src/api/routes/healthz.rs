@@ -1,5 +1,4 @@
 //! Health checking endpoints.
-//!
 
 use axum::{routing::get, Router};
 
