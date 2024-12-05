@@ -39,8 +39,7 @@ pub async fn run() -> color_eyre::Result<Router> {
 
     let router = Router::new()
         .nest("/", pages::compose(web_state))
-        .nest("/api/v1", api::routes::v1::compose(api_state))
-        .nest("/healthz", api::routes::healthz::compose())
+        .nest("/api", api::routes::compose(api_state))
         .route_layer(Extension(database_health_check));
     Ok(router)
 }
