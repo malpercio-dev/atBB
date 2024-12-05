@@ -3,7 +3,7 @@
 
 use crate::{
     api::{self, ApiState, ApiStateInner},
-    models::forum::Forum,
+    models::forum::{Forum, ForumId},
     resources::DatabaseClient,
     web::{pages, WebState, WebStateInner},
 };
@@ -18,9 +18,9 @@ pub async fn run() -> color_eyre::Result<Router> {
     let web_state = WebState {
         inner: WebStateInner {
             forums: vec![Forum {
-                id: "asdf",
-                name: "hello world",
-                description: "this is a forum",
+                id: ForumId("asdf".into()),
+                name: "hello world".to_string(),
+                description: "this is a forum".to_string(),
             }],
         }
         .into(),
@@ -29,9 +29,9 @@ pub async fn run() -> color_eyre::Result<Router> {
     let api_state = ApiState {
         inner: ApiStateInner {
             forums: vec![Forum {
-                id: "asdf",
-                name: "hello world",
-                description: "this is a forum",
+                id: ForumId("asdf".into()),
+                name: "hello world".to_string(),
+                description: "this is a forum".to_string(),
             }],
         }
         .into(),

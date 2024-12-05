@@ -3,8 +3,17 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Serialize)]
+pub struct ForumId(pub Box<str>);
+
+impl ForumId {
+    pub fn from_str(inner: &str) -> Self {
+        Self(inner.into())
+    }
+}
+
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Forum {
-    pub id: &'static str,
-    pub name: &'static str,
-    pub description: &'static str,
+    pub id: ForumId,
+    pub name: String,
+    pub description: String,
 }
