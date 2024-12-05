@@ -1,61 +1,28 @@
-use atrium_api::{record::KnownRecord::AppBskyFeedPost, types::string};
-use clap::Parser;
-use jetstream_oxide::{
-    events::{commit::CommitEvent, JetstreamEvent::Commit},
-    DefaultJetstreamEndpoints, JetstreamCompression, JetstreamConfig, JetstreamConnector,
-};
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// The DIDs to listen for events on, if not provided we will listen for all DIDs.
-    #[arg(short, long)]
-    did: Option<Vec<string::Did>>,
-    /// The NSID for the collection to listen for (e.g. `app.bsky.feed.post`).
-    #[arg(short, long)]
-    nsid: string::Nsid,
-}
+use color_eyre::Help;
+use std::net::IpAddr;
+use std::net::Ipv4Addr;
+use std::net::SocketAddr;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
-    let args = Args::parse();
+async fn main() -> color_eyre::Result<()> {
+    let port: u16 = std::env::var("BIND_PORT")
+        .ok()
+        .map(|p| p.parse())
+        .unwrap_or(Ok(8080))
+        .with_warning(|| "the provided BIND_PORT is not valid")
+        .with_note(|| "the default port of 8080 is used if not specified")?;
 
-    let dids = args.did.unwrap_or_default();
-    let config = JetstreamConfig {
-        endpoint: DefaultJetstreamEndpoints::USEastOne.into(),
-        wanted_collections: vec![args.nsid.clone()],
-        wanted_dids: dids.clone(),
-        compression: JetstreamCompression::Zstd,
-        cursor: None,
-    };
+    let addr: IpAddr = std::env::var("BIND_ADDR")
+        .ok()
+        .map(|p| p.parse())
+        .unwrap_or(Ok(IpAddr::V4(Ipv4Addr::UNSPECIFIED)))
+        .with_warning(|| "the provided BIND_ADDR is not valid")
+        .with_note(|| "the default of `0.0.0.0` is used if not specified")?;
 
-    let jetstream = JetstreamConnector::new(config)?;
-    let (receiver, _) = jetstream.connect().await?;
+    let socket_addr: SocketAddr = (addr, port).into();
 
-    println!(
-        "Listening for '{}' events on DIDs: {:?}",
-        args.nsid.as_str(),
-        dids,
-    );
-
-    while let Ok(event) = receiver.recv_async().await {
-        if let Commit(commit) = event {
-            match commit {
-                CommitEvent::Create { info: _, commit } => {
-                    if let AppBskyFeedPost(record) = commit.record {
-                        println!(
-                            "New post created! ({})\n\n'{}'",
-                            commit.info.rkey, record.text
-                        );
-                    }
-                }
-                CommitEvent::Delete { info: _, commit } => {
-                    println!("A post has been deleted. ({})", commit.rkey);
-                }
-                _ => {}
-            }
-        }
-    }
-
+    let router = atbb::run().await?;
+    let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
+    axum::serve(listener, router).await.unwrap();
     Ok(())
 }

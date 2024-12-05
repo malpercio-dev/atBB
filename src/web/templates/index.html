@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Index
+{% endblock %}
+
+{% block content %}
+<h1>Index</h1>
+<h2>Forums</h2>
+
+<div class="forums">
+  {% include 'components/forums.html' %}
+</div>
+
+{% endblock %}
