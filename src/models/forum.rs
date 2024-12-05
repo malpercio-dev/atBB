@@ -7,7 +7,7 @@ pub struct ForumId(pub Box<str>);
 
 impl ForumId {
     pub fn from_str(inner: &str) -> Self {
-        Self(inner.into())
+        Self(Box::from(inner))
     }
 }
 
