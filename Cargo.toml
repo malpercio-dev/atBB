@@ -8,6 +8,7 @@ license = "AGPL-3.0"
 
 [dependencies]
 axum = "0.7.5"
+axum-embed = "0.1.0"
 async-trait = "0.1.83"
 atrium-api = "0.24.8"
 color-eyre = "0.6.2"
@@ -16,6 +17,7 @@ http-body = "1.0.1"
 http-body-util = "0.1.2"
 jetstream-oxide = "0.1.0"
 lazy_static = "1.4.0"
+rust-embed = { version = "8.5.0", features = ["compression", "debug-embed", "include-exclude"] }
 serde = { version = "1.0.195", features = ["derive"] }
 tera = "1.19.1"
 thiserror = "2.0.0"
