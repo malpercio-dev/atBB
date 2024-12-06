@@ -19,3 +19,6 @@ BB-style forum (such as phpBB) on ATProto.
 This will likely involve building out, at mimumum,
 a lexicon, an AppView, and designed with flexibility and ease in deployment in mind so that it is
 simple for admins to set up a new atBB forum.
+
+# Other links
+- [atBB Lexicons](https://github.com/atBB-Community/lexicon)
