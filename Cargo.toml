@@ -22,5 +22,3 @@ serde = { version = "1.0.195", features = ["derive"] }
 tera = "1.19.1"
 thiserror = "2.0.0"
 tokio = { version = "1.41.1", features = ["full", "sync"] }
-tower = "0.5.1"
-tower-http = { version = "0.6.2", features = ["fs"] }
