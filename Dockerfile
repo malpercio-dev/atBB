@@ -24,7 +24,5 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
  
 FROM debian:bullseye-slim
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/src/web/static /usr/local/bin/atbb/src/web/static
-COPY --from=builder /app/src/web/templates /usr/local/bin/atbb/src/web/templates
-COPY --from=builder /usr/local/cargo/bin/atbb /usr/local/bin/atbb/atbb
-CMD [ "/usr/local/bin/atbb/atbb" ]
+COPY --from=builder /usr/local/cargo/bin/atbb /usr/local/bin/atbb
+CMD [ "/usr/local/bin/atbb" ]
