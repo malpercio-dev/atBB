@@ -36,14 +36,14 @@ lazy_static! {
                 Ok(c) => c,
                 Err(e) => {
                     println!("Template parsing error(s): {e}");
-                    panic!();
+                    panic!("Template parsing error(s): {e}");
                 }
             };
             match tera.add_raw_template(&path, contents) {
                 Ok(t) => t,
                 Err(e) => {
                     println!("Template parsing error(s): {e}");
-                    panic!();
+                    panic!("Template parsing error(s): {e}");
                 }
             }
         }
