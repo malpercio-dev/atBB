@@ -9,6 +9,22 @@ pub enum DatabaseKind {
     Postgres,
 }
 
+#[derive(Debug, Error)]
+#[error("{0}")]
+pub struct DatabaseKindParseError(&'static str);
+
+impl std::str::FromStr for DatabaseKind {
+    type Err = DatabaseKindParseError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "SQLITE" | "sqlite" => Ok(Self::Sqlite),
+            "POSTGRES" | "postgres" => Ok(Self::Postgres),
+            _ => Err(DatabaseKindParseError("could not parse DatabaseKind")),
+        }
+    }
+}
+
 /// A client for interfacing with a database.
 pub struct DatabaseClient {
     pool: Pool<Any>,

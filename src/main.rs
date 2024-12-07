@@ -20,12 +20,16 @@ async fn main() -> color_eyre::Result<()> {
         .with_warning(|| "the provided BIND_ADDR is not valid")
         .with_note(|| "the default of `0.0.0.0` is used if not specified")?;
 
+    let database_kind: atbb::DatabaseKind = std::env::var("DATABASE_KIND")
+        .ok()
+        .map(|p| p.parse())
+        .unwrap_or(Ok(atbb::DatabaseKind::Sqlite))
+        .with_warning(|| "the provided DATABASE_KIND is not valid")
+        .with_note(|| "the default engine of Sqlite is used if not specified")?;
+
     let socket_addr: SocketAddr = (addr, port).into();
 
-    let router = atbb::run(Config {
-        database_kind: atbb::DatabaseKind::Sqlite,
-    })
-    .await?;
+    let router = atbb::run(Config { database_kind }).await?;
     let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
     axum::serve(listener, router).await.unwrap();
     Ok(())
