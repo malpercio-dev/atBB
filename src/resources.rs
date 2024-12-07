@@ -4,3 +4,4 @@
 mod database;
 
 pub use database::DatabaseClient;
+pub use database::DatabaseKind;

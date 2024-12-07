@@ -1,3 +1,4 @@
+use atbb::Config;
 use color_eyre::Help;
 use std::net::IpAddr;
 use std::net::Ipv4Addr;
@@ -21,7 +22,10 @@ async fn main() -> color_eyre::Result<()> {
 
     let socket_addr: SocketAddr = (addr, port).into();
 
-    let router = atbb::run().await?;
+    let router = atbb::run(Config {
+        database_kind: atbb::DatabaseKind::Sqlite,
+    })
+    .await?;
     let listener = tokio::net::TcpListener::bind(socket_addr).await.unwrap();
     axum::serve(listener, router).await.unwrap();
     Ok(())
