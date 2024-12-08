@@ -1,7 +1,10 @@
 use async_trait::async_trait;
 use sea_query::{PostgresQueryBuilder, QueryBuilder, SchemaBuilder, SqliteQueryBuilder};
-use sqlx::{Any, AnyPool, Pool};
+use sqlx::{any::install_default_drivers, Any, AnyPool, Pool};
+use sqlx_migrator::{Info, Migrate, Migrator, Plan};
 use thiserror::Error;
+
+mod migrations;
 
 #[derive(PartialEq)]
 pub enum DatabaseKind {
@@ -52,8 +55,17 @@ impl DatabaseClient {
             panic!()
         };
 
+        install_default_drivers();
         let pool = AnyPool::connect(url).await.unwrap();
+        Self::migrate(&pool).await?;
         Ok(Self { pool })
+    }
+
+    pub async fn migrate(pool: &Pool<Any>) -> color_eyre::Result<(), sqlx_migrator::Error> {
+        let mut migrator = Migrator::default();
+        migrator.add_migrations(migrations::migrations());
+        let mut conn = pool.acquire().await?;
+        migrator.run(&mut *conn, &Plan::apply_all()).await
     }
 }
 
@@ -70,7 +82,8 @@ impl health::Checkable for DatabaseClient {
             .fetch_one(&self.pool)
             .await
         {
-            Ok(_r) => Ok(()),
+            Ok(CheckResult(150)) => Ok(()),
+            Ok(_) => Err(Self::Error::HealthCheckFailure()),
             Err(e) => Err(Self::Error::Sqlx(Box::new(e))),
         }
     }
@@ -84,4 +97,6 @@ impl health::Checkable for DatabaseClient {
 pub enum DatabaseError {
     #[error("sqlx error")]
     Sqlx(#[source] Box<dyn std::error::Error + Send + Sync>),
+    #[error("health check failure")]
+    HealthCheckFailure(),
 }
