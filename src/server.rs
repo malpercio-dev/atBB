@@ -11,7 +11,8 @@ use crate::{
 use axum::{Extension, Router};
 
 pub async fn run(config: Config) -> color_eyre::Result<Router> {
-    let database = DatabaseClient::new(config.database_kind).await?;
+    let database = DatabaseClient::new(config.database_kind, config.database_url).await?;
+    database.migrate().await?;
     let database_health_check = health::PeriodicChecker::new(database, health::Config::default());
     tokio::spawn(database_health_check.clone().run());
 

@@ -1,12 +1,11 @@
+use std::str::FromStr;
+
 use async_trait::async_trait;
-use sea_query::{PostgresQueryBuilder, QueryBuilder, SchemaBuilder, SqliteQueryBuilder};
+use serde::{Deserialize, Serialize};
 use sqlx::{any::install_default_drivers, Any, AnyPool, Pool};
-use sqlx_migrator::{Info, Migrate, Migrator, Plan};
 use thiserror::Error;
 
-mod migrations;
-
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum DatabaseKind {
     Sqlite,
     Postgres,
@@ -21,51 +20,53 @@ impl std::str::FromStr for DatabaseKind {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "SQLITE" | "sqlite" => Ok(Self::Sqlite),
-            "POSTGRES" | "postgres" => Ok(Self::Postgres),
+            "SQLITE" | "Sqlite" | "sqlite" => Ok(Self::Sqlite),
+            "POSTGRES" | "Postgres" | "postgres" => Ok(Self::Postgres),
             _ => Err(DatabaseKindParseError("could not parse DatabaseKind")),
         }
+    }
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct DatabaseUrl(pub Box<str>);
+
+impl std::str::FromStr for DatabaseUrl {
+    type Err = DatabaseError;
+
+    fn from_str(inner: &str) -> Result<Self, Self::Err> {
+        Ok(Self(Box::from(inner)))
     }
 }
 
 /// A client for interfacing with a database.
 pub struct DatabaseClient {
     pool: Pool<Any>,
+    kind: DatabaseKind,
 }
 
 impl DatabaseClient {
-    pub async fn new(database_kind: DatabaseKind) -> color_eyre::Result<Self> {
-        let (url, _box_query_builder, _box_schema_builder): (
-            &str,
-            Box<dyn QueryBuilder>,
-            Box<dyn SchemaBuilder>,
-        ) = if database_kind == DatabaseKind::Postgres {
-            (
-                "postgres://sea:sea@127.0.0.1/query",
-                Box::new(PostgresQueryBuilder {}),
-                Box::new(PostgresQueryBuilder {}),
-            )
-        } else if database_kind == DatabaseKind::Sqlite {
-            (
-                "sqlite::memory:",
-                Box::new(SqliteQueryBuilder {}),
-                Box::new(SqliteQueryBuilder {}),
-            )
-        } else {
-            panic!()
-        };
-
+    pub async fn new(
+        database_kind: DatabaseKind,
+        database_url: DatabaseUrl,
+    ) -> color_eyre::Result<Self> {
         install_default_drivers();
-        let pool = AnyPool::connect(url).await.unwrap();
-        Self::migrate(&pool).await?;
-        Ok(Self { pool })
+        let opts = sqlx::any::AnyConnectOptions::from_str(&database_url.0)?;
+        let pool = AnyPool::connect_with(opts).await.unwrap();
+        Ok(Self {
+            pool,
+            kind: database_kind,
+        })
     }
 
-    pub async fn migrate(pool: &Pool<Any>) -> color_eyre::Result<(), sqlx_migrator::Error> {
-        let mut migrator = Migrator::default();
-        migrator.add_migrations(migrations::migrations());
-        let mut conn = pool.acquire().await?;
-        migrator.run(&mut *conn, &Plan::apply_all()).await
+    pub async fn migrate(&self) -> color_eyre::Result<(), sqlx::Error> {
+        let mut conn = self.pool.acquire().await?;
+        match self.kind {
+            DatabaseKind::Postgres => sqlx::migrate!("db/migrations/postgres"),
+            DatabaseKind::Sqlite => sqlx::migrate!("db/migrations/sqlite"),
+        }
+        .run(&mut conn)
+        .await?;
+        Ok(())
     }
 }
 
@@ -99,4 +100,6 @@ pub enum DatabaseError {
     Sqlx(#[source] Box<dyn std::error::Error + Send + Sync>),
     #[error("health check failure")]
     HealthCheckFailure(),
+    #[error("invalid database_url")]
+    ParseDatabaseUrlError(),
 }
