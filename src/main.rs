@@ -7,8 +7,8 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() -> color_eyre::Result<()> {
-    dotenv().ok(); // Reads the .env file
-    
+    dotenv().ok();
+
     let port: u16 = std::env::var("BIND_PORT")
         .ok()
         .map(|p| p.parse())
