@@ -9,10 +9,6 @@ mod web;
 pub use resources::DatabaseKind;
 pub use resources::DatabaseUrl;
 
-pub async fn run(config: Config) -> color_eyre::Result<Router> {
-    server::run(config).await
-}
-
 /// Configuration for the application.
 pub struct Config {
     /// The kind of database engine to use.
@@ -23,4 +19,8 @@ pub struct Config {
     /// For Sqlite, can be something like sqlite::memory:, sqlite:data.db
     /// For Postgres, postgresql://localhost/mydb, postgresql://user@localhost
     pub database_url: DatabaseUrl,
+}
+
+pub async fn run(config: Config) -> color_eyre::Result<Router> {
+    server::run(config).await
 }
