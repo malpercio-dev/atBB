@@ -19,9 +19,9 @@ impl std::str::FromStr for DatabaseKind {
     type Err = DatabaseKindParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "SQLITE" | "Sqlite" | "sqlite" => Ok(Self::Sqlite),
-            "POSTGRES" | "Postgres" | "postgres" => Ok(Self::Postgres),
+        match s.to_lowercase().as_str() {
+            "sqlite" => Ok(Self::Sqlite),
+            "postgres" => Ok(Self::Postgres),
             _ => Err(DatabaseKindParseError("could not parse DatabaseKind")),
         }
     }
