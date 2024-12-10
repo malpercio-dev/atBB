@@ -6,13 +6,14 @@ use crate::{
     models::forum::{Forum, ForumId},
     resources::DatabaseClient,
     web::{pages, WebState, WebStateInner},
+    Config,
 };
 use axum::{Extension, Router};
 
-pub async fn run() -> color_eyre::Result<Router> {
-    let database = DatabaseClient::new()?;
-    let database_health_check =
-        health::PeriodicChecker::new(database.clone(), health::Config::default());
+pub async fn run(config: Config) -> color_eyre::Result<Router> {
+    let database = DatabaseClient::new(config.database_kind, config.database_url).await?;
+    database.migrate().await?;
+    let database_health_check = health::PeriodicChecker::new(database, health::Config::default());
     tokio::spawn(database_health_check.clone().run());
 
     let web_state = WebState {

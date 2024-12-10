@@ -19,3 +19,8 @@ Cargo.lock
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Environment variables loaded by dotenv
+#  Ignored as environment variables can often contain sensitive information.
+#  .env.example is not ignored and can be used as a template for your own .env.
+.env
