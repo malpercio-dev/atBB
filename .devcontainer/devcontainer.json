@@ -1,0 +1,16 @@
+{
+    "name": "Rust Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/rust:latest",
+    "appPort": [8080],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rust-lang.rust-analyzer",
+                "mikestead.dotenv",
+                "oderwat.indent-rainbow",
+                "ms-azuretools.vscode-docker",
+                "formulahendry.github-actions"
+            ]
+        }
+    }
+}
